@@ -90,6 +90,8 @@ h2 { font-size: clamp(32px, 4.6vw, 52px); line-height: 1.02; font-weight: 800; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(14,159,91,.5);} 70% { box-shadow: 0 0 0 10px rgba(14,159,91,0);} 100% { box-shadow: 0 0 0 0 rgba(14,159,91,0);} }
 h1 { font-size: clamp(46px, 7.4vw, 92px); line-height: .94; font-weight: 800; margin-top: 22px; }
 h1 span { display: block; }
+.hello { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.me { width: 76px; height: 76px; border-radius: 50%; object-fit: cover; border: 3px solid #fff; box-shadow: 0 0 0 3px var(--lime); }
 .h1-sub { -webkit-text-stroke: 3px var(--ink); paint-order: stroke fill; color: var(--bg); }
 .hero p.lede { font-size: 20px; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
@@ -137,6 +139,7 @@ h1 span { display: block; }
 .hist-plot a.failure::before { content: "×"; position: absolute; left: 0; right: 0; top: -20px; text-align: center; color: var(--fail); font-weight: 800; font-size: 15px; line-height: 1; }
 .hist-plot a.cancelled { background: #A9BDB1; }
 .hist-plot a:hover, .hist-plot a:focus-visible { filter: brightness(1.25); }
+.hist-plot i.sk { flex: 1 1 0; max-width: 44px; border-radius: 4px 4px 0 0; background: #E3EDE6; }
 .hist-empty { align-self: center; margin: 0 auto; color: var(--muted); font-size: 15px; }
 .hist-stats { display: flex; flex-wrap: wrap; gap: 10px 32px; margin-top: 16px; color: var(--muted); font-size: 15px; }
 .hist-stats b { font: 800 26px var(--display); color: var(--ink); margin-right: 8px; letter-spacing: -0.02em; }
@@ -292,12 +295,18 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   .flow { grid-template-columns: repeat(3, 1fr); }
   .charts, .tools { grid-template-columns: 1fr; }
   .gates { grid-template-columns: 1fr; }
-  .nav-links a:not(.cv) { display: none; }
+  .nav-links a:not(.cv):not(.keep) { display: none; }
 }
 @media (max-width: 560px) {
   .wrap { padding-left: 16px; padding-right: 16px; }
   .block { padding-top: 72px; }
   .flow { grid-template-columns: repeat(2, 1fr); }
+  .nav-inner { padding-left: 14px; }
+  .h1-sub { -webkit-text-stroke-width: 2px; }
+  .dots { display: none; }
+  .term-top { font-size: 12px; }
+  .brand { font-size: 16px; gap: 8px; }
+  .nav-links a { padding: 8px 11px; font-size: 14px; }
   .flow-detail { grid-template-columns: 1fr; }
   .hbar { grid-template-columns: 96px 1fr 54px; font-size: 14px; }
   .lab-box, .card, .tile { padding: 22px; }
@@ -323,6 +332,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
       <a href="#lab">Failure lab</a>
       <a href="#career">Career</a>
       <a href="#tools">Toolbox</a>
+      <a class="keep" href="#contact">Contact</a>
       <a class="cv" href="Asa_Halperin_CV.pdf" download>Download CV</a>
     </nav>
   </div>
@@ -332,8 +342,8 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
 
 <header class="wrap hero">
   <div>
-    <span class="avail"><b></b>Open to QA and automation leadership roles</span>
-    <h1><span>Quality,</span><span class="h1-sub">engineered.</span></h1>
+    <div class="hello"><img class="me" src="asa.jpg" alt="Portrait of Asa Halperin" width="76" height="76" onerror="this.remove()"><span class="avail"><b></b>Open to QA and automation leadership roles</span></div>
+    <h1><span>Quality,</span> <span class="h1-sub">engineered.</span></h1>
     <p class="lede">I'm Asa Halperin. For 17 years I've made software releases dependable, and for more than 8 of them I've led the QA and automation teams doing it. I build the infrastructure behind the tests: frameworks, pipelines, environments, reports, and AI inside the QA process.</p>
     <div class="hero-actions">
       <a class="btn solid" href="#platform">See the platform
@@ -349,7 +359,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
       <p class="cmd" id="cmd">$ <b>gh run view</b> --latest --branch main</p>
       <div id="jobs"></div>
     </div>
-    <div class="term-foot"><span class="res" id="res">loading latest run…</span><span class="foot-actions"><a id="runlink" href="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml">Open on GitHub</a><button type="button" id="replay">Replay</button></span></div>
+    <div class="term-foot"><span class="res" id="res"></span><span class="foot-actions"><a id="runlink" href="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml">Open on GitHub</a><button type="button" id="replay">Replay</button></span></div>
   </div>
 </header>
 
@@ -405,11 +415,11 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
 
   <div class="card hist-card">
     <div class="hist-head">
-      <div><h3>Recent pipeline runs</h3><p class="cap" id="hist-cap">Loading live data from GitHub Actions…</p></div>
+      <div><h3>Recent pipeline runs</h3><p class="cap" id="hist-cap">Completed runs on all branches, from GitHub Actions. Bar height is run duration.</p></div>
       <div class="legend small"><span><i style="background:#0B6B43"></i>Passed</span><span><i class="lg-fail"></i>Failed</span><span><i style="background:#A9BDB1"></i>Cancelled</span></div>
     </div>
     <div class="hist-plot" id="hist" role="list" aria-label="Recent pipeline runs, oldest to newest"></div>
-    <div class="tip" id="hist-tip" aria-live="polite">Point at a bar to see the run. Select it to open the run on GitHub.</div>
+    <div class="tip" id="hist-tip" aria-live="polite">Point at a bar to see the run. Select it to open it on GitHub.</div>
     <div class="hist-stats" id="hist-stats"></div>
   </div>
 
@@ -431,9 +441,9 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   </div>
 
   <div class="gates">
-    <div class="gate" id="g-secret"><b>…</b><span>Secret scan of the test image</span><small>Loading the latest result.</small></div>
-    <div class="gate" id="g-vuln"><b>…</b><span>Fixable critical vulnerabilities gate</span><small>Loading the latest result.</small></div>
-    <div class="gate" id="g-tests"><b>…</b><span>Product test suites</span><small>Loading the latest result.</small></div>
+    <div class="gate" id="g-secret"><b></b><span>Secret scan of the test image</span><small></small></div>
+    <div class="gate" id="g-vuln"><b></b><span>Fixable critical vulnerabilities gate</span><small></small></div>
+    <div class="gate" id="g-tests"><b></b><span>Product test suites</span><small></small></div>
   </div>
 
   <div class="links-row">
@@ -539,7 +549,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
 </section>
 
 <div class="wrap">
-  <section class="cta">
+  <section class="cta" id="contact">
     <h2>Looking for someone to own quality?</h2>
     <p>I'm looking for my next QA or automation leadership role in central Israel. I'd be glad to talk.</p>
     <div class="hero-actions">
@@ -548,7 +558,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
       <a class="btn" href="Asa_Halperin_CV.pdf" download>Download CV</a>
     </div>
   </section>
-  <footer><span>© 2026 Asa Halperin</span><span>Built by hand and hosted on GitHub Pages</span></footer>
+  <footer><span>© 2026 Asa Halperin</span><span>Live data from GitHub Actions, hosted on GitHub Pages</span></footer>
 </div>
 
 </main>
@@ -583,17 +593,22 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   }
   function day(d) { return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); }
   function getJSON(url) {
-    var key = 'gh:' + url;
-    try { var hit = JSON.parse(sessionStorage.getItem(key)); if (hit && Date.now() - hit.t < 300000) return Promise.resolve(hit.d); } catch (e) {}
-    return fetch(url, { headers: { Accept: 'application/vnd.github+json' } }).then(function (r) {
+    var key = 'gh:' + url, hit = null;
+    try { hit = JSON.parse(localStorage.getItem(key)); } catch (e) {}
+    if (hit && Date.now() - hit.t < 300000) return Promise.resolve(hit.d);
+    var ctl = 'AbortController' in window ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 7000);
+    return fetch(url, { headers: { Accept: 'application/vnd.github+json' }, signal: ctl ? ctl.signal : undefined }).then(function (r) {
+      clearTimeout(timer);
       if (!r.ok) throw new Error('GitHub ' + r.status);
       return r.json();
-    }).then(function (d) { try { sessionStorage.setItem(key, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {} return d; });
+    }).then(function (d) { try { localStorage.setItem(key, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {} return d; })
+      .catch(function (err) { clearTimeout(timer); if (hit) return hit.d; throw err; });
   }
 
   /* Hero terminal: replays the real timing of the run, compressed to a few seconds */
   var res = document.getElementById('res'), jobsBox = document.getElementById('jobs'), timers = [], current = RECORDED;
-  function drawTerminal(run) {
+  function drawTerminal(run, still) {
     current = run;
     document.getElementById('term-meta').innerHTML = run.recorded
       ? 'automation-platform · recorded ' + esc(run.when)
@@ -603,19 +618,19 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
       var sub = SUB[j.name] || (j.name.indexOf('test') === 0 ? 'runs inside the scanned image' : '');
       return '<div class="job"><span class="ic"></span><span class="nm">' + esc(j.name) + (sub ? '<small>' + sub + '</small>' : '') + '</span><span class="tm">' + fmt(j.dur) + '</span><div class="bar"><i></i></div></div>';
     }).join('');
-    play();
+    play(still);
   }
   function finish() {
     var r = current;
     res.className = 'res ' + (r.ok ? 'ok' : 'bad');
     res.textContent = (r.ok ? '✓ passed in ' : '× failed after ') + fmt(r.total);
   }
-  function play() {
+  function play(still) {
     timers.forEach(clearTimeout); timers = [];
     var els = [].slice.call(jobsBox.children), r = current;
     els.forEach(function (el) { el.className = 'job'; var b = el.querySelector('.bar i'); b.style.transition = 'none'; b.style.width = '0'; });
     function end(el, j) { el.classList.remove('run'); el.classList.add(j.c === 'success' ? 'done' : 'fail'); }
-    if (reduce) { els.forEach(function (el, i) { end(el, r.jobs[i]); el.querySelector('.bar i').style.width = '100%'; }); finish(); return; }
+    if (reduce || still === true) { els.forEach(function (el, i) { end(el, r.jobs[i]); el.querySelector('.bar i').style.width = '100%'; }); finish(); return; }
     res.className = 'res'; res.textContent = 'replaying…';
     var span = Math.max.apply(null, r.jobs.map(function (j) { return j.off + j.dur; })) || 1, k = 6000 / span;
     els.forEach(function (el, i) {
@@ -625,7 +640,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     });
     timers.push(setTimeout(finish, 400 + span * k + 500));
   }
-  document.getElementById('replay').addEventListener('click', play);
+  document.getElementById('replay').addEventListener('click', function () { play(); });
 
   /* Job duration bars */
   function drawJobBars(run) {
@@ -648,8 +663,8 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   }
   function drawGates(run, rawJobs) {
     if (run.recorded) {
-      gate('g-secret', 'success', 'Recorded on ' + run.when + '. Live status is unavailable right now.');
-      gate('g-vuln', 'success', 'Recorded on ' + run.when + '. Live status is unavailable right now.');
+      gate('g-secret', 'success', 'No secrets in the layers this project adds. Recorded on ' + run.when + '.');
+      gate('g-vuln', 'success', 'The pipeline stops on a critical vulnerability that has a fix. Recorded on ' + run.when + '.');
       var gt = document.getElementById('g-tests'); gt.querySelector('b').className = 'ok'; gt.querySelector('b').textContent = '9 / 9';
       gt.querySelector('span').textContent = 'tests passed'; gt.querySelector('small').textContent = 'Recorded on ' + run.when + '.';
       return;
@@ -724,7 +739,9 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   }
   watchFills();
 
-  function useRecorded() { drawTerminal(RECORDED); drawJobBars(RECORDED); drawGates(RECORDED, []); }
+  /* Recorded data is on screen at once; live data replaces it when GitHub answers */
+  drawTerminal(RECORDED, true); drawJobBars(RECORDED); drawGates(RECORDED, []);
+  (function () { var h = '', sk = [62, 70, 58, 66, 74, 60, 68, 30, 72, 64, 59, 71, 67, 28, 69, 73, 61, 65, 70, 63]; sk.forEach(function (v) { h += '<i class="sk" style="height:' + v + '%"></i>'; }); document.getElementById('hist').innerHTML = h; })();
   getJSON(API + '/actions/workflows/ci.yml/runs?status=completed&per_page=40').then(function (d) {
     var runs = d.workflow_runs || [];
     if (!runs.length) throw new Error('no runs');
@@ -743,8 +760,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
       drawTerminal(run); drawJobBars(run); drawGates(run, raw);
     });
   }).catch(function () {
-    if (!document.getElementById('hist').children.length) historyUnavailable();
-    useRecorded();
+    if (!document.querySelector('#hist a')) historyUnavailable();
   });
 
 
