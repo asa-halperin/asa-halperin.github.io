@@ -348,8 +348,8 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     <div class="hero-actions">
       <a class="btn solid" href="#platform">See the platform
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
-      <a class="btn" href="https://www.linkedin.com/in/asa-halperin">LinkedIn</a>
-      <a class="btn" href="https://github.com/asa-halperin/automation-platform">GitHub</a>
+      <a class="btn" target="_blank" rel="noopener" href="https://www.linkedin.com/in/asa-halperin">LinkedIn</a>
+      <a class="btn" target="_blank" rel="noopener" href="https://github.com/asa-halperin/automation-platform">GitHub</a>
     </div>
   </div>
 
@@ -359,7 +359,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
       <p class="cmd" id="cmd">$ <b>gh run view</b> --latest --branch main</p>
       <div id="jobs"></div>
     </div>
-    <div class="term-foot"><span class="res" id="res"></span><span class="foot-actions"><a id="runlink" href="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml">Open on GitHub</a><button type="button" id="replay">Replay</button></span></div>
+    <div class="term-foot"><span class="res" id="res"></span><span class="foot-actions"><a id="runlink" target="_blank" rel="noopener" href="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml">Open on GitHub</a><button type="button" id="replay">Replay</button></span></div>
   </div>
 </header>
 
@@ -447,9 +447,9 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   </div>
 
   <div class="links-row">
-    <a class="btn solid" href="https://asa-halperin.github.io/automation-platform/">Open the live test report</a>
-    <a class="btn" href="https://github.com/asa-halperin/automation-platform">Read the code</a>
-    <a href="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml"><img src="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml/badge.svg" alt="Current CI status"></a>
+    <a class="btn solid" target="_blank" rel="noopener" href="https://asa-halperin.github.io/automation-platform/">Open the live test report</a>
+    <a class="btn" target="_blank" rel="noopener" href="https://github.com/asa-halperin/automation-platform">Read the code</a>
+    <a target="_blank" rel="noopener" href="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml"><img src="https://github.com/asa-halperin/automation-platform/actions/workflows/ci.yml/badge.svg" alt="Current CI status"></a>
   </div>
 </section>
 
@@ -554,7 +554,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     <p>I'm looking for my next QA or automation leadership role in central Israel. I'd be glad to talk.</p>
     <div class="hero-actions">
       <a class="btn lime" href="mailto:asahalp@gmail.com">Email me</a>
-      <a class="btn" href="https://www.linkedin.com/in/asa-halperin">LinkedIn</a>
+      <a class="btn" target="_blank" rel="noopener" href="https://www.linkedin.com/in/asa-halperin">LinkedIn</a>
       <a class="btn" href="Asa_Halperin_CV.pdf" download>Download CV</a>
     </div>
   </section>
@@ -702,7 +702,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     list.forEach(function (r) {
       var a = document.createElement('a'), cls = r.c === 'success' ? 'success' : r.c === 'failure' ? 'failure' : 'cancelled';
       var word = cls === 'success' ? 'passed' : cls === 'failure' ? 'failed' : (r.c || 'cancelled');
-      a.href = r.url; a.className = cls; a.setAttribute('role', 'listitem');
+      a.href = r.url; a.target = "_blank"; a.rel = "noopener"; a.className = cls; a.setAttribute('role', 'listitem');
       a.style.height = Math.max(4, r.dur / max * 100) + '%';
       var text = 'Run #' + r.num + ' · ' + word + ' · ' + fmt(r.dur) + ' · ' + r.br + ' · ' + day(r.at);
       a.setAttribute('aria-label', text);
