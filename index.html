@@ -503,7 +503,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
 </section>
 
 <section class="wrap block" id="career">
-  <h2>Seventeen years, five companies</h2>
+  <h2>Seventeen years, six roles</h2>
   <p class="lede">Select a period on the timeline to see the role.</p>
 
   <div class="card tl-card">
@@ -517,40 +517,46 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     <details class="role" data-k="candex" open>
       <summary><span><span class="r-co">Candex</span><span class="r-ti">Software Quality &amp; Automation Engineer</span></span><span class="r-yr">2024 – 2026</span></summary>
       <ul>
-        <li>The only QA engineer in the Israel office, working with local R&amp;D and Product and with the QA team in Canada.</li>
-        <li>Expanded automation in TypeScript and Playwright alongside an existing Java and Selenium suite.</li>
-        <li>Built Claude Code skills that run only the regression tests affected by each change, with a nightly full regression as a safety net.</li>
-        <li>Used Atlassian Rovo to analyze requirements in Jira and Confluence and verify automation coverage against them.</li>
+        <li>Sole QA engineer in the Israel office, working with local R&amp;D and Product and with the QA team in Canada.</li>
+        <li>Expanded test automation in a TypeScript/Playwright framework, alongside the existing Java/Selenium suite.</li>
+        <li>Built Claude Code skills that run only the tests affected by a change to shared functions, with a full regression every night.</li>
+        <li>Used Claude Code, Copilot and Rovo to write tests faster and check coverage against the requirements in Jira.</li>
+        <li>Owned quality for new features end to end, from exploratory testing to new automated tests.</li>
+        <li>Tested APIs with Postman; managed bugs and tasks in YouTrack, Jira and Confluence.</li>
       </ul>
     </details>
     <details class="role" data-k="veev">
       <summary><span><span class="r-co">Veev</span><span class="r-ti">Senior QA Manager</span><span class="pill">team of 4</span></span><span class="r-yr">2021 – 2023</span></summary>
       <ul>
-        <li>Led a QA team in Israel and Ukraine, and created the QA strategy for the IoT product line from scratch.</li>
-        <li>Built Web (Selenium) and Mobile (Appium) frameworks in Java, running in a Jenkins pipeline.</li>
-        <li>Investigated production issues with DevTools and Logz.io on AWS.</li>
+        <li>Led a team of 4 QA engineers in Israel and Ukraine, in an Agile environment on AWS.</li>
+        <li>Created the QA strategy and standards from scratch for the IoT product line, including hardware-software integration.</li>
+        <li>Built web and mobile automation frameworks (Java, Selenium, Appium) running in Jenkins; tested APIs with Postman and RestAssured.</li>
+        <li>Investigated production issues with Logz.io and Chrome DevTools; tracked bugs and test cases in Jira and TestRail.</li>
       </ul>
     </details>
     <details class="role" data-k="impala">
       <summary><span><span class="r-co">Impala Digital</span><span class="r-ti">QA Team Leader</span><span class="pill">team of up to 6</span></span><span class="r-yr">2018 – 2021</span></summary>
       <ul>
-        <li>Managed QA engineers locally and abroad across Web and AWS environments.</li>
-        <li>Established Java and Selenium automation with TestNG, RestAssured, Maven and Jenkins.</li>
+        <li>Managed a team of up to 6 QA engineers in Israel and abroad, covering the company's web products on AWS.</li>
+        <li>Planned and ran test cycles, and worked with server and frontend R&amp;D, Product and management on release timelines.</li>
+        <li>Set up Java/Selenium automation with TestNG, ExtentReports and Maven, running in Jenkins; also used Appium, RestAssured and SQL.</li>
         <li>Ran basic load tests with JMeter.</li>
       </ul>
     </details>
     <details class="role" data-k="click">
       <summary><span><span class="r-co">ClickDimensions</span><span class="r-ti">Senior QA Automation Engineer</span></span><span class="r-yr">2015 – 2018</span></summary>
       <ul>
-        <li>Owned quality for a product embedded in Microsoft Dynamics CRM.</li>
-        <li>Built C# and Selenium verification suites and wrote STP and STD documents.</li>
+        <li>Tested ClickDimensions' marketing automation product, built into Microsoft Dynamics CRM, manually and with C#/Selenium automation.</li>
+        <li>Covered web, compatibility, security and database testing.</li>
+        <li>Wrote STP and STD documents and worked with Product and R&amp;D in a TFS-managed environment.</li>
       </ul>
     </details>
     <details class="role" data-k="cool">
       <summary><span><span class="r-co">Coolvision</span><span class="r-ti">QA Engineer, then QA Team Leader</span><span class="pill">team of 5</span></span><span class="r-yr">2009 – 2015</span></summary>
       <ul>
-        <li>Promoted to team leader in 2012 and led a team of five QA engineers until 2015.</li>
-        <li>Functional, end-to-end and compatibility testing for web and mobile, with complex SQL.</li>
+        <li>Promoted from QA engineer to QA team leader in 2012, and led a team of 5 QA engineers until 2015.</li>
+        <li>Covered most of the company's products in short release cycles, working with the DBA, design and R&amp;D teams.</li>
+        <li>Ran functional, E2E and compatibility testing for web and mobile, and validated data with complex SQL queries.</li>
       </ul>
     </details>
   </div>
@@ -892,7 +898,6 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   render();
 
   /* Career timeline */
-  var T0 = 2009, T1 = 2027;
   var segs = [
     { k: 'cool', a: 2009, b: 2012, t: 'ic', n: 'Coolvision', d: 'QA Engineer, 2009 to 2012' },
     { k: 'cool', a: 2012, b: 2015.800, t: 'lead', n: 'Coolvision', d: 'QA Team Leader, team of 5, 2012 to 2015' },
@@ -902,7 +907,10 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     { k: 'candex', a: 2024.670, b: 2026.800, t: 'ic', n: 'Candex', d: 'Software Quality & Automation Engineer, 2024 to 2026' }
   ];
   var tl = document.getElementById('tl'), tip = document.getElementById('tip');
-  function pct(y) { return (y - T0) / (T1 - T0) * 100; }
+  /* Roles are drawn one after another: each block's width follows its length, and each label sits where its role starts */
+  function span(s) { return Math.max(s.b - s.a, 2); }
+  var total = segs.reduce(function (n, s) { return n + span(s); }, 0), acc = 0;
+  segs.forEach(function (s) { s.x0 = acc / total * 100; acc += span(s); s.x1 = acc / total * 100; });
   function show(s, el) {
     tip.innerHTML = '<b>' + s.n + '</b> · ' + s.d + (s.t === 'lead' ? ' · leading a team' : '');
     [].slice.call(tl.children).forEach(function (c) { c.classList.toggle('on', c === el); });
@@ -911,7 +919,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   segs.forEach(function (s) {
     var b = document.createElement('button');
     b.type = 'button'; b.className = 'segm ' + s.t;
-    b.style.left = 'calc(' + pct(s.a) + '% + 1px)'; b.style.width = 'calc(' + (pct(s.b) - pct(s.a)) + '% - 2px)';
+    b.style.left = 'calc(' + s.x0 + '% + 1px)'; b.style.width = 'calc(' + (s.x1 - s.x0) + '% - 2px)';
     b.setAttribute('aria-label', s.n + ': ' + s.d);
     b.innerHTML = '<span>' + s.n + '</span>';
     b.addEventListener('mouseenter', function () { show(s, b); });
@@ -924,7 +932,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     tl.appendChild(b);
   });
   var ax = document.getElementById('axis');
-  [2009, 2012, 2015, 2018, 2021, 2024].forEach(function (y) { var s = document.createElement('span'); s.style.left = pct(y) + '%'; s.textContent = y; ax.appendChild(s); });
+  segs.forEach(function (g) { var s = document.createElement('span'); s.style.left = g.x0 + '%'; s.textContent = Math.floor(g.a); ax.appendChild(s); });
   show(segs[segs.length - 1], tl.lastChild);
 })();
 </script>
