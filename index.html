@@ -236,11 +236,23 @@ a.cell:focus-visible { outline: 2px solid #C9F46B; outline-offset: 2px; }
 a.cell:hover { filter: brightness(1.15); }
 a.rerun { text-decoration: none; }
 .lab-empty { color: #9FBBAA; padding: 18px 0; }
+button.cell { width: 100%; border: 0; padding: 0; cursor: pointer; font: inherit; }
+button.cell:focus-visible { outline: 2px solid #C9F46B; outline-offset: 2px; }
+button.cell:hover { filter: brightness(1.15); }
+button.cell.sel { box-shadow: 0 0 0 2px #C9F46B; }
+.lab-detail { margin-top: 16px; background: #0F2219; border: 1px solid #23392C; border-radius: var(--r-md); padding: 18px 20px; }
+.lab-detail h4 { margin: 0; font: 700 16px var(--display); color: #F1FAF3; }
+.lab-detail .meta { color: #9FBBAA; font-size: 14px; margin: 4px 0 12px; }
+.lab-detail pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #FFC9C4; background: #150D0C; border-radius: 10px; padding: 12px 14px; }
+.lab-detail .acts { display: flex; gap: 18px; margin-top: 12px; font-size: 14.5px; font-weight: 600; }
+.lab-detail .acts a { color: var(--lime); }
+.lab-detail .acts button { background: none; border: 0; color: #9FBBAA; font: inherit; cursor: pointer; padding: 0; }
 @media (max-width: 640px) {
   table.runs { min-width: 0; font-size: 13px; }
   table.runs thead th:not(.l) { font-size: 0; }
   table.runs td.name { white-space: normal; min-width: 104px; line-height: 1.3; padding-right: 8px; }
-  table.runs td.c { width: auto; padding: 0 1px; }
+  table.runs td.c { width: auto; min-width: 18px; padding: 0 1px; }
+  .cell { min-width: 16px; }
   .cell { height: 22px; }
   .verdict { margin-left: 4px; padding: 2px 8px; font-size: 12px; }
 }
@@ -498,8 +510,9 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     <div class="grid-scroll">
       <table class="runs" id="runs"><thead></thead><tbody></tbody></table>
     </div>
+    <div class="lab-detail" id="lab-detail" hidden></div>
     <div class="lab-sum" id="lab-sum"></div>
-    <p class="sim" id="lab-note">Every square is one real nightly run of my padel booking app's test suite. Amber means the test passed only on a retry. Click a square to open that run on GitHub.</p>
+    <p class="sim" id="lab-note">Every square is one real nightly run of my padel booking app's test suite. Amber means the test passed only on a retry. Click a red or amber square to see the error, or a green one to open that run on GitHub.</p>
   </div>
 
   <div class="card nightly" id="nightly">
@@ -851,7 +864,24 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
 
   /* Failure lab: real nightly results, read from the chaos-data branch. Read-only, never triggers a run. */
   var HISTORY = 'https://raw.githubusercontent.com/asa-halperin/automation-platform/chaos-data/history.json';
-  var profile = 'calm', runs = null;
+  var profile = 'calm', runs = null, details = [];
+  var panel = document.getElementById('lab-detail');
+  function closeDetail() {
+    panel.hidden = true; panel.innerHTML = '';
+    [].slice.call(document.querySelectorAll('#runs button.cell.sel')).forEach(function (b) { b.classList.remove('sel'); });
+  }
+  function openDetail(btn) {
+    var d = details[+btn.dataset.d];
+    closeDetail(); btn.classList.add('sel');
+    panel.innerHTML = '<h4>' + esc(d.title) + '</h4><p class="meta">' + esc(d.label) + '</p><pre>' + esc(d.error) + '</pre>' +
+      '<div class="acts"><a href="' + esc(d.url) + '" target="_blank" rel="noopener">Open the run on GitHub</a><button type="button" id="lab-close">Close</button></div>';
+    panel.hidden = false;
+    document.getElementById('lab-close').addEventListener('click', function () { closeDetail(); btn.focus(); });
+  }
+  document.getElementById('runs').addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('button.cell');
+    if (btn) openDetail(btn);
+  });
   function cols() { return window.innerWidth < 640 ? 6 : 12; }
   var desc = {
     calm: 'Faults are off. This is the baseline: every test should pass on the first try, which is what the required checks on a pull request see.',
@@ -866,7 +896,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     var bad = seen.filter(function (c) { return c.status === 'unexpected'; }).length;
     var retry = seen.filter(function (c) { return c.status === 'flaky'; }).length;
     if (bad === 0 && retry === 0) return ['Stable', 'v-stable'];
-    if (bad === n) return n >= 3 ? ['Real bug', 'v-broken'] : ['Failing', 'v-broken'];
+    if (bad === n) return n >= 3 ? ['Real bug', 'v-broken'] : ['Failed', 'v-broken'];
     return ['Flaky', 'v-flaky'];
   }
   function render() {
@@ -888,11 +918,12 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     for (var i = 0; i < pad; i++) head += '<th></th>';
     recent.forEach(function (r) { head += '<th title="' + esc(day(r.date)) + '">#' + r.number + '</th>'; });
     t.tHead.innerHTML = head + '<th class="l" style="padding-left:12px">Verdict</th></tr>';
-    var counts = { Stable: 0, Flaky: 0, bug: 0 }, first = 0, total = 0, html = '';
+    var counts = { Stable: 0, Flaky: 0, 'Real bug': 0, Failed: 0 }, first = 0, total = 0, html = '';
+    details = []; closeDetail();
     titles.forEach(function (title) {
       var cells = recent.map(function (r) { return r.profiles[profile].filter(function (x) { return x.title === title; })[0]; });
       var v = verdict(cells);
-      if (v[0] === 'Stable') counts.Stable++; else if (v[0] === 'Flaky') counts.Flaky++; else if (v[1] === 'v-broken') counts.bug++;
+      if (counts[v[0]] !== undefined) counts[v[0]]++;
       html += '<tr><td class="name l">' + esc(title) + '</td>';
       for (var i = 0; i < pad; i++) html += '<td class="c"><span class="cell pending" title="No run yet"></span></td>';
       cells.forEach(function (c, k) {
@@ -901,7 +932,12 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
         total++; if (c.status === 'expected') first++;
         var cls = c.status === 'expected' ? '' : c.status === 'flaky' ? ' r' : ' f';
         var label = 'Run #' + r.number + ', ' + day(r.date) + ': ' + (WORD[c.status] || c.status) + (c.attempts > 1 ? ' (' + c.attempts + ' attempts)' : '');
-        html += '<td class="c"><a class="cell' + cls + '" href="' + esc(r.url) + '" target="_blank" rel="noopener" title="' + esc(label) + '" aria-label="' + esc(title + '. ' + label) + '"></a></td>';
+        if (c.error) {
+          details.push({ title: title, label: label, error: c.error, url: r.url });
+          html += '<td class="c"><button type="button" class="cell' + cls + '" data-d="' + (details.length - 1) + '" title="' + esc(label + '. Click to see the error') + '" aria-label="' + esc(title + '. ' + label + '. Show the error') + '"></button></td>';
+        } else {
+          html += '<td class="c"><a class="cell' + cls + '" href="' + esc(r.url) + '" target="_blank" rel="noopener" title="' + esc(label) + '" aria-label="' + esc(title + '. ' + label) + '"></a></td>';
+        }
       });
       html += '<td class="l"><span class="verdict ' + v[1] + '">' + v[0] + '</span></td></tr>';
     });
@@ -910,7 +946,8 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
     document.getElementById('lab-sum').innerHTML =
       '<span><b>' + Math.round(first / total * 100) + '%</b>passed first try</span>' +
       '<span><b>' + counts.Stable + '</b>stable</span><span><b>' + counts.Flaky + '</b>flaky</span>' +
-      '<span><b>' + counts.bug + '</b>failing every night</span>' +
+      '<span><b>' + counts['Real bug'] + '</b>real bug</span>' +
+      (counts.Failed ? '<span><b>' + counts.Failed + '</b>failed, too early to call</span>' : '') +
       '<span><b>' + recent.length + '</b>' + (recent.length === 1 ? 'night' : 'nights') + ' recorded</span>';
   }
   [].slice.call(document.querySelectorAll('.seg button')).forEach(function (b) {
