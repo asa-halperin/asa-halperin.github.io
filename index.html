@@ -230,6 +230,20 @@ table.runs td.c { padding: 0 2px; width: 30px; }
 .cell.f { background: var(--fail); }
 .cell.f::after { content: "×"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 14px; line-height: 1; }
 .cell.pending { background: #14271D; }
+.cell.r { background: #D9B43A; }
+.cell.r::after { content: "↻"; position: absolute; inset: 0; display: grid; place-items: center; color: #2A2208; font-weight: 700; font-size: 13px; line-height: 1; }
+a.cell:focus-visible { outline: 2px solid #C9F46B; outline-offset: 2px; }
+a.cell:hover { filter: brightness(1.15); }
+a.rerun { text-decoration: none; }
+.lab-empty { color: #9FBBAA; padding: 18px 0; }
+@media (max-width: 640px) {
+  table.runs { min-width: 0; font-size: 13px; }
+  table.runs thead th:not(.l) { font-size: 0; }
+  table.runs td.name { white-space: normal; min-width: 104px; line-height: 1.3; padding-right: 8px; }
+  table.runs td.c { width: auto; padding: 0 1px; }
+  .cell { height: 22px; }
+  .verdict { margin-left: 4px; padding: 2px 8px; font-size: 12px; }
+}
 .verdict { display: inline-block; padding: 3px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; white-space: nowrap; margin-left: 10px; }
 .v-stable { background: #12301F; color: #7BE0A8; }
 .v-flaky { background: #3A3312; color: #F0D766; }
@@ -469,7 +483,7 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
 
 <section class="wrap block" id="lab">
   <h2>Failure lab</h2>
-  <p class="lede">Not every red test means the same thing. The first question is always which kind of failure it is. Switch the fault profile and watch twelve runs of the same suite.</p>
+  <p class="lede">Not every red test means the same thing. The first question is always which kind of failure it is. Switch the fault profile and see the last twelve nights of the same suite, run for real.</p>
 
   <div class="lab-box">
     <div class="lab-head">
@@ -477,16 +491,15 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
         <button type="button" aria-pressed="true" data-p="calm">Calm</button>
         <button type="button" aria-pressed="false" data-p="flaky">Flaky</button>
         <button type="button" aria-pressed="false" data-p="broken">Real bug</button>
-        <button type="button" aria-pressed="false" data-p="env">Environment down</button>
       </div>
-      <button type="button" class="rerun" id="rerun">Run 12 more times</button>
+      <a class="rerun" id="rerun" target="_blank" rel="noopener" href="https://github.com/asa-halperin/automation-platform/actions/workflows/chaos.yml">Open on GitHub</a>
     </div>
     <p class="lab-desc" id="lab-desc"></p>
     <div class="grid-scroll">
       <table class="runs" id="runs"><thead></thead><tbody></tbody></table>
     </div>
     <div class="lab-sum" id="lab-sum"></div>
-    <p class="sim">This grid is a simulation in your browser. The same fault profiles now run for real against my padel booking app, every night. The real results are below.</p>
+    <p class="sim" id="lab-note">Every square is one real nightly run of my padel booking app's test suite. Amber means the test passed only on a retry. Click a square to open that run on GitHub.</p>
   </div>
 
   <div class="card nightly" id="nightly">
@@ -836,56 +849,69 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
   tabs.forEach(function (b, i) { b.addEventListener('click', function () { pick(i); }); });
   pick(0);
 
-  /* Failure lab */
-  var tests = ['Sign in', 'Browse free slots', 'Book a 60 minute slot', 'Price of a 90 minute slot', 'Cancel a booking', 'Two players, same slot', 'My bookings list', 'Sign out'];
-  var RUNS = 12, profile = 'calm', seed = 7;
+  /* Failure lab: real nightly results, read from the chaos-data branch. Read-only, never triggers a run. */
+  var HISTORY = 'https://raw.githubusercontent.com/asa-halperin/automation-platform/chaos-data/history.json';
+  var profile = 'calm', runs = null;
+  function cols() { return window.innerWidth < 640 ? 6 : 12; }
   var desc = {
-    calm: 'Faults are off. Every run is green, which is what the required checks on a pull request see.',
-    flaky: 'Random latency and a race on the last free slot. The same code passes and fails between runs. Retrying hides it, so the platform has to track it.',
-    broken: 'A real defect: a 90 minute booking is charged as two full hours. That test fails on every run, in the same place. This is a bug to file, not a test to retry.',
-    env: 'The API went down for two runs. Everything fails together and recovers together. The product is fine and the tests are fine.'
+    calm: 'Faults are off. This is the baseline: every test should pass on the first try, which is what the required checks on a pull request see.',
+    flaky: 'Random latency, 503 errors and booking conflicts are injected. The same code passes, passes only on a retry, or fails, from night to night. Retrying hides it, so the platform has to track it.',
+    broken: 'A planted defect: a 90 minute booking is charged as two full hours. That test fails every night, on every retry, with the same wrong price. This is a bug to file, not a test to retry.'
   };
-  function rnd() { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }
-  function simulate() {
-    return tests.map(function (name, ti) {
-      var row = [];
-      for (var r = 0; r < RUNS; r++) {
-        var fail = false;
-        if (profile === 'flaky' || profile === 'broken') { if (ti === 5 && rnd() < .34) fail = true; if (ti === 1 && rnd() < .18) fail = true; }
-        if (profile === 'broken' && ti === 3) fail = true;
-        if (profile === 'env' && (r === 6 || r === 7)) fail = true;
-        row.push(fail);
-      }
-      return row;
-    });
-  }
-  function verdict(row, all) {
-    var f = row.filter(Boolean).length;
-    if (f === 0) return ['Stable', 'v-stable'];
-    if (f === RUNS) return ['Real bug', 'v-broken'];
-    var envOnly = row.every(function (x, r) { return !x || all.every(function (o) { return o[r]; }); });
-    if (envOnly) return ['Environment', 'v-env'];
+  var WORD = { expected: 'passed on the first try', flaky: 'passed only on a retry', unexpected: 'failed on every retry', skipped: 'skipped' };
+  function day(iso) { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
+  function verdict(cells) {
+    var seen = cells.filter(Boolean), n = seen.length;
+    if (!n) return ['No data', 'v-env'];
+    var bad = seen.filter(function (c) { return c.status === 'unexpected'; }).length;
+    var retry = seen.filter(function (c) { return c.status === 'flaky'; }).length;
+    if (bad === 0 && retry === 0) return ['Stable', 'v-stable'];
+    if (bad === n) return n >= 3 ? ['Real bug', 'v-broken'] : ['Failing', 'v-broken'];
     return ['Flaky', 'v-flaky'];
   }
   function render() {
     document.getElementById('lab-desc').textContent = desc[profile];
-    var data = simulate(), t = document.getElementById('runs');
+    var t = document.getElementById('runs');
+    if (!runs) return;
+    var RUNS = cols();
+    var recent = runs.filter(function (r) { return r.profiles && r.profiles[profile]; }).slice(-RUNS);
+    if (!recent.length) {
+      t.tHead.innerHTML = '';
+      t.tBodies[0].innerHTML = '<tr><td class="lab-empty">No nightly run has recorded this profile yet.</td></tr>';
+      document.getElementById('lab-sum').innerHTML = '';
+      return;
+    }
+    var titles = [];
+    recent.forEach(function (r) { r.profiles[profile].forEach(function (x) { if (titles.indexOf(x.title) < 0) titles.push(x.title); }); });
+    var pad = RUNS - recent.length;
     var head = '<tr><th class="l">Test</th>';
-    for (var r = 1; r <= RUNS; r++) head += '<th>' + r + '</th>';
+    for (var i = 0; i < pad; i++) head += '<th></th>';
+    recent.forEach(function (r) { head += '<th title="' + esc(day(r.date)) + '">#' + r.number + '</th>'; });
     t.tHead.innerHTML = head + '<th class="l" style="padding-left:12px">Verdict</th></tr>';
-    var counts = { Stable: 0, Flaky: 0, 'Real bug': 0, Environment: 0 }, passed = 0, html = '';
-    data.forEach(function (row, i) {
-      var v = verdict(row, data); counts[v[0]]++;
-      html += '<tr><td class="name l">' + tests[i] + '</td>';
-      row.forEach(function (f, r) { if (!f) passed++; html += '<td class="c"><span class="cell' + (f ? ' f' : '') + '" title="Run ' + (r + 1) + ': ' + (f ? 'failed' : 'passed') + '"></span></td>'; });
+    var counts = { Stable: 0, Flaky: 0, bug: 0 }, first = 0, total = 0, html = '';
+    titles.forEach(function (title) {
+      var cells = recent.map(function (r) { return r.profiles[profile].filter(function (x) { return x.title === title; })[0]; });
+      var v = verdict(cells);
+      if (v[0] === 'Stable') counts.Stable++; else if (v[0] === 'Flaky') counts.Flaky++; else if (v[1] === 'v-broken') counts.bug++;
+      html += '<tr><td class="name l">' + esc(title) + '</td>';
+      for (var i = 0; i < pad; i++) html += '<td class="c"><span class="cell pending" title="No run yet"></span></td>';
+      cells.forEach(function (c, k) {
+        var r = recent[k];
+        if (!c) { html += '<td class="c"><span class="cell pending" title="Not run that night"></span></td>'; return; }
+        total++; if (c.status === 'expected') first++;
+        var cls = c.status === 'expected' ? '' : c.status === 'flaky' ? ' r' : ' f';
+        var label = 'Run #' + r.number + ', ' + day(r.date) + ': ' + (WORD[c.status] || c.status) + (c.attempts > 1 ? ' (' + c.attempts + ' attempts)' : '');
+        html += '<td class="c"><a class="cell' + cls + '" href="' + esc(r.url) + '" target="_blank" rel="noopener" title="' + esc(label) + '" aria-label="' + esc(title + '. ' + label) + '"></a></td>';
+      });
       html += '<td class="l"><span class="verdict ' + v[1] + '">' + v[0] + '</span></td></tr>';
     });
     t.tBodies[0].innerHTML = html;
-    var total = tests.length * RUNS;
+    document.getElementById('rerun').href = recent[recent.length - 1].url;
     document.getElementById('lab-sum').innerHTML =
-      '<span><b>' + Math.round(passed / total * 100) + '%</b>pass rate</span>' +
+      '<span><b>' + Math.round(first / total * 100) + '%</b>passed first try</span>' +
       '<span><b>' + counts.Stable + '</b>stable</span><span><b>' + counts.Flaky + '</b>flaky</span>' +
-      '<span><b>' + counts['Real bug'] + '</b>real bug</span><span><b>' + counts.Environment + '</b>hit by environment</span>';
+      '<span><b>' + counts.bug + '</b>failing every night</span>' +
+      '<span><b>' + recent.length + '</b>' + (recent.length === 1 ? 'night' : 'nights') + ' recorded</span>';
   }
   [].slice.call(document.querySelectorAll('.seg button')).forEach(function (b) {
     b.addEventListener('click', function () {
@@ -894,8 +920,26 @@ footer { padding: 28px 0 44px; color: var(--muted); font-size: 14px; display: fl
       render();
     });
   });
-  document.getElementById('rerun').addEventListener('click', function () { seed = Math.floor(Math.random() * 1e9); render(); });
   render();
+  var lastCols = cols();
+  window.addEventListener('resize', function () { if (cols() !== lastCols) { lastCols = cols(); render(); } });
+  (function loadHistory() {
+    var ctl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 8000);
+    fetch(HISTORY, ctl ? { signal: ctl.signal } : {}).then(function (r) {
+      if (!r.ok) throw new Error(r.status);
+      return r.json();
+    }).then(function (data) {
+      clearTimeout(timer);
+      runs = Array.isArray(data) ? data : [];
+      render();
+    }).catch(function () {
+      clearTimeout(timer);
+      var t = document.getElementById('runs');
+      t.tHead.innerHTML = '';
+      t.tBodies[0].innerHTML = '<tr><td class="lab-empty">The nightly results could not be loaded just now. They are one click away on GitHub.</td></tr>';
+    });
+  })();
 
   /* Career timeline */
   var segs = [
